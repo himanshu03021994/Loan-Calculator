@@ -1,69 +1,197 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>PL Calculator</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #f4f6f8;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
-        .box {
-            background: white;
-            padding: 25px;
-            border-radius: 10px;
-            width: 320px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-            text-align: center;
-        }
-        input, button {
-            width: 90%;
-            padding: 10px;
-            margin: 8px 0;
-        }
-        button {
-            background: #0077cc;
-            color: white;
-            border: none;
-            cursor: pointer;
-        }
-        h2 {
-            color: #0077cc;
-        }
-    </style>
+<meta charset="UTF-8">
+<title>Smart Loan Calculator</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: 'Poppins', sans-serif;
+    background: radial-gradient(circle at top, #1a1a2e, #000);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #fff;
+}
+
+.app {
+    width: 380px;
+    background: rgba(255,255,255,0.08);
+    backdrop-filter: blur(20px);
+    border-radius: 22px;
+    padding: 24px;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.8);
+    animation: fadeIn 0.8s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.header h1 {
+    font-size: 22px;
+    font-weight: 700;
+}
+
+.header p {
+    font-size: 13px;
+    opacity: 0.7;
+}
+
+.section {
+    margin: 18px 0;
+}
+
+.label {
+    font-size: 13px;
+    opacity: 0.8;
+}
+
+.value {
+    font-size: 18px;
+    font-weight: 600;
+    margin-top: 4px;
+}
+
+input[type="range"] {
+    width: 100%;
+    margin-top: 8px;
+}
+
+.range {
+    accent-color: #00f5d4;
+}
+
+.card {
+    background: rgba(255,255,255,0.1);
+    padding: 16px;
+    border-radius: 16px;
+    margin-top: 20px;
+}
+
+.row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+    margin: 8px 0;
+}
+
+.highlight {
+    color: #00f5d4;
+    font-weight: 600;
+}
+
+button {
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #00f5d4, #0bbcd6);
+    color: #000;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 20px;
+}
+
+button:hover {
+    transform: scale(1.02);
+}
+
+.footer {
+    text-align: center;
+    font-size: 11px;
+    opacity: 0.5;
+    margin-top: 14px;
+}
+</style>
 </head>
+
 <body>
 
-<div class="box">
-    <h2>Personal Loan Calculator</h2>
+<div class="app">
+    <div class="header">
+        <h1>💰 Smart Loan Calculator</h1>
+        <p>Calculate EMI like a pro</p>
+    </div>
 
-    <input type="number" id="amount" placeholder="Loan Amount (₹)">
-    <input type="number" id="rate" placeholder="Interest Rate (%)">
-    <input type="number" id="time" placeholder="Tenure (Years)">
+    <div class="section">
+        <div class="label">Loan Amount</div>
+        <div class="value">₹ <span id="amountVal">500000</span></div>
+        <input type="range" min="50000" max="5000000" step="10000"
+               value="500000" class="range"
+               oninput="amountVal.innerText=this.value; calculate()">
+    </div>
 
-    <button onclick="calculate()">Calculate EMI</button>
+    <div class="section">
+        <div class="label">Interest Rate (% p.a.)</div>
+        <div class="value"><span id="rateVal">10</span> %</div>
+        <input type="range" min="5" max="25" step="0.1"
+               value="10" class="range"
+               oninput="rateVal.innerText=this.value; calculate()">
+    </div>
 
-    <p id="result"></p>
+    <div class="section">
+        <div class="label">Tenure</div>
+        <div class="value"><span id="yearVal">5</span> Years</div>
+        <input type="range" min="1" max="30" step="1"
+               value="5" class="range"
+               oninput="yearVal.innerText=this.value; calculate()">
+    </div>
+
+    <div class="card">
+        <div class="row">
+            <span>Monthly EMI</span>
+            <span class="highlight" id="emi">₹ 0</span>
+        </div>
+        <div class="row">
+            <span>Total Interest</span>
+            <span id="interest">₹ 0</span>
+        </div>
+        <div class="row">
+            <span>Total Payment</span>
+            <span id="total">₹ 0</span>
+        </div>
+    </div>
+
+    <button onclick="calculate()">Recalculate</button>
+
+    <div class="footer">
+        Designed like a FinTech App
+    </div>
 </div>
 
 <script>
 function calculate() {
-    let P = amount.value;
-    let R = rate.value / 12 / 100;
-    let N = time.value * 12;
-
-    if (!P || !R || !N) {
-        result.innerText = "Please fill all fields";
-        return;
-    }
+    let P = document.querySelector('input[min="50000"]').value;
+    let R = document.querySelector('input[min="5"]').value / 12 / 100;
+    let N = document.querySelector('input[min="1"]').value * 12;
 
     let EMI = (P * R * Math.pow(1 + R, N)) / (Math.pow(1 + R, N) - 1);
-    result.innerText = "Monthly EMI: ₹ " + EMI.toFixed(2);
+    let total = EMI * N;
+    let interest = total - P;
+
+    document.getElementById("emi").innerText = "₹ " + EMI.toFixed(0);
+    document.getElementById("interest").innerText = "₹ " + interest.toFixed(0);
+    document.getElementById("total").innerText = "₹ " + total.toFixed(0);
 }
+
+calculate();
 </script>
 
 </body>
